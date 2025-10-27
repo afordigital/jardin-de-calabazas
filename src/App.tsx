@@ -16,6 +16,7 @@ function App() {
   const [cursor, setCursor] = useState<Point | null>(null);
   const isDrawing = useRef<boolean>(false);
   const ERASER_SIZE = 20;
+  const stageRef = useRef(null);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     isDrawing.current = true;
@@ -62,6 +63,20 @@ function App() {
     const restored = redoStack[redoStack.length - 1];
     setRedoStack(redoStack.slice(0, -1));
     setLines([...lines, restored]);
+  };
+
+  const savePumpkin = () => {
+    const uri = stageRef.current?.toDataURL();
+    if (!uri) return;
+
+    const img = getBase64Image();
+    console.log(img);
+  };
+
+  const getBase64Image = () => {
+    const link = document.createElement("a");
+
+    return link.href;
   };
 
   return (
@@ -116,39 +131,43 @@ function App() {
         onTouchStart={handleMouseDown}
         onTouchMove={handleMouseMove}
         onTouchEnd={handleMouseUp}
+        ref={stageRef}
       >
-          <Layer>
-        
-              <Text className="w-full h-full text-center text-slate-500"  text="Draw your pumpkin here 🎃" x={5} y={30} />
-              {lines.map((line, i) => (
-                <Line
-                  key={i}
-                  points={line.points}
-                  stroke={line.tool === "eraser" ? "#000000" : line.color}
-                  strokeWidth={line.tool === "eraser" ? ERASER_SIZE : 5}
-                  tension={0.5}
-                  lineCap="round"
-                  lineJoin="round"
-                  globalCompositeOperation={
-                    line.tool === "eraser" ? "destination-out" : "source-over"
-                  }
-                />
-              ))}
-         
-            {tool === "eraser" && cursor && (
-              <Rect
-                x={cursor.x - ERASER_SIZE / 2}
-                y={cursor.y - ERASER_SIZE / 2}
-                width={ERASER_SIZE}
-                height={ERASER_SIZE}
-                stroke="#333"
-                dash={[4, 4]}
-                listening={false}
-              />
-            )}
-          </Layer>
+        <Layer>
+          {lines.map((line, i) => (
+            <Line
+              key={i}
+              points={line.points}
+              stroke={line.tool === "eraser" ? "#000000" : line.color}
+              strokeWidth={line.tool === "eraser" ? ERASER_SIZE : 5}
+              tension={0.5}
+              lineCap="round"
+              lineJoin="round"
+              globalCompositeOperation={
+                line.tool === "eraser" ? "destination-out" : "source-over"
+              }
+            />
+          ))}
+
+          {tool === "eraser" && cursor && (
+            <Rect
+              x={cursor.x - ERASER_SIZE / 2}
+              y={cursor.y - ERASER_SIZE / 2}
+              width={ERASER_SIZE}
+              height={ERASER_SIZE}
+              stroke="#333"
+              dash={[4, 4]}
+              listening={false}
+            />
+          )}
+        </Layer>
       </Stage>
-      <button>Save pumpkin 🎃</button>
+      <button
+        onClick={savePumpkin}
+        className="border-2 border-slate-600 rounded px-2 py-1 text-sm"
+      >
+        Save pumpkin 🎃
+      </button>
     </div>
   );
 }

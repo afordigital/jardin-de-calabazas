@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
     "konva": "^10.0.8",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
