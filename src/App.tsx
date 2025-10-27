@@ -77,7 +77,7 @@ function App() {
     const img = getBase64Image();
     if (!img) return;
 
-    const { error } = await supabase.from("calabazas").insert({ img });
+    const { error } = await supabase.from("calabazas").insert({ img, visible: false });
     if (error) {
       console.error(error);
       setToast("Error al guardar la calabaza");

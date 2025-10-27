@@ -8,8 +8,8 @@ type Pumpkin = {
 };
 
 type PositionedPumpkin = Pumpkin & {
-  left: string;
-  top: string;
+  left: number;
+  top: number;
   rotate: number;
 };
 
@@ -26,6 +26,7 @@ export default function Garden() {
       const { data, error } = await supabase
         .from("calabazas")
         .select("id,img")
+        .eq("visible", true)
         .order("id", { ascending: false });
       if (!mounted) return;
       if (error) {
@@ -42,13 +43,47 @@ export default function Garden() {
   }, []);
 
   const positioned = useMemo<PositionedPumpkin[]>(() => {
-    // Random positions in viewport using percentages to avoid measuring container.
-    return pumpkins.map((p) => ({
-      ...p,
-      left: `${Math.floor(Math.random() * 88)}%`,
-      top: `${Math.floor(Math.random() * 88)}%`,
-      rotate: Math.floor(Math.random() * 40) - 20,
-    }));
+    const width = window.innerWidth || 1200;
+    const height = window.innerHeight || 800;
+    const size = 120;
+    const padding = 8;
+    const minX = size / 2 + padding;
+    const maxX = Math.max(minX, width - size / 2 - padding);
+    const minY = size / 2 + padding;
+    const maxY = Math.max(minY, height - size / 2 - padding);
+    const placed: PositionedPumpkin[] = [];
+    const maxTries = 200;
+
+    const collides = (x: number, y: number) => {
+      for (const q of placed) {
+        const dx = x - q.left;
+        const dy = y - q.top;
+        const dist2 = dx * dx + dy * dy;
+        const minDist = size * 0.9;
+        if (dist2 < minDist * minDist) return true;
+      }
+      return false;
+    };
+
+    for (const p of pumpkins) {
+      let x = minX;
+      let y = minY;
+      let tries = 0;
+      do {
+        x = Math.random() * (maxX - minX) + minX;
+        y = Math.random() * (maxY - minY) + minY;
+        tries++;
+      } while (collides(x, y) && tries < maxTries);
+
+      placed.push({
+        ...p,
+        left: x,
+        top: y,
+        rotate: Math.floor(Math.random() * 40) - 20,
+      });
+    }
+
+    return placed;
   }, [pumpkins]);
 
   if (loading) {
