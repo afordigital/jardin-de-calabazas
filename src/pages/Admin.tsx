@@ -25,7 +25,7 @@ export default function Admin() {
     }
     setAuthed(passwordInput === ADMIN_PASSWORD);
     if (passwordInput !== ADMIN_PASSWORD) {
-      setError("Contraseña incorrecta");
+      setError("Contraseña incorrecta :(");
       setTimeout(() => setError(null), 2000);
     }
   };
