@@ -1,7 +1,10 @@
 import { useRef, useState } from "react";
 import "./App.css";
-import { Stage, Layer, Line, Text, Rect } from "react-konva";
+import { Stage, Layer, Line, Rect } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
+import Konva from "konva";
+import { Link } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
 
 function App() {
   type Tool = "pen" | "eraser";
@@ -16,7 +19,12 @@ function App() {
   const [cursor, setCursor] = useState<Point | null>(null);
   const isDrawing = useRef<boolean>(false);
   const ERASER_SIZE = 20;
-  const stageRef = useRef(null);
+  const stageRef = useRef<Konva.Stage | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+  const supabaseKey = import.meta.env.VITE_SUPABASE_KEY
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     isDrawing.current = true;
@@ -65,18 +73,27 @@ function App() {
     setLines([...lines, restored]);
   };
 
-  const savePumpkin = () => {
-    const uri = stageRef.current?.toDataURL();
-    if (!uri) return;
-
+  const savePumpkin = async () => {
     const img = getBase64Image();
-    console.log(img);
+    if (!img) return;
+
+    const { error } = await supabase.from("calabazas").insert({ img });
+    if (error) {
+      console.error(error);
+      setToast("Error al guardar la calabaza");
+      setTimeout(() => setToast(null), 2000);
+      return;
+    }
+
+    setLines([]);
+    setRedoStack([]);
+    setToast("Calabaza guardada 🎃");
+    setTimeout(() => setToast(null), 2000);
   };
 
-  const getBase64Image = () => {
-    const link = document.createElement("a");
-
-    return link.href;
+  const getBase64Image = (): string | undefined => {
+    const uri = stageRef.current?.toDataURL();
+    return uri;
   };
 
   return (
@@ -168,6 +185,18 @@ function App() {
       >
         Save pumpkin 🎃
       </button>
+      <Link
+        to="/garden"
+        className="border-2 border-slate-600 rounded px-2 py-1 text-sm"
+      >
+        Ir al jardín
+      </Link>
+
+      {toast && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-sm px-3 py-2 rounded shadow">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
