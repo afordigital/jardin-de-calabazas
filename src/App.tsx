@@ -6,6 +6,7 @@ import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import Garden from "./pages/Garden";
 
+//
 function App() {
   const [tool, setTool] = useState<Tool>("pen");
   const [color, setColor] = useState<Color>("black");
@@ -17,10 +18,8 @@ function App() {
   const stageRef = useRef<Konva.Stage | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
-
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     isDrawing.current = true;
@@ -67,7 +66,7 @@ function App() {
     setLines([...lines, restored]);
   };
 
-    const savePumpkin = async () => {
+  const savePumpkin = async () => {
     const img = getBase64Image();
     if (!img) return;
 
@@ -75,17 +74,17 @@ function App() {
 
     try {
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/validate-pumpkin`, 
+        `${supabaseUrl}/functions/v1/validate-pumpkin`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'apikey': supabaseKey, 
+            "Content-Type": "application/json",
+            apikey: supabaseKey,
           },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             imageData: img,
-            userId: userId 
-          })
+            userId: userId,
+          }),
         }
       );
 
@@ -101,7 +100,6 @@ function App() {
       setRedoStack([]);
       setToast(`Calabaza guardada 🎃 (Te quedan ${result.remaining})`);
       setTimeout(() => setToast(null), 3000);
-
     } catch (error) {
       console.error(error);
       setToast("Error de conexión");
