@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 
-
 type Pumpkin = {
   id: number;
   img: string;
@@ -15,7 +14,9 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD as string | undefined;
+  const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
   const tryAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,22 +50,46 @@ export default function Admin() {
     }
   }, [authed]);
 
-  const approve = async (id: number) => {
-    const { error } = await supabase.from("calabazas").update({ visible: true }).eq("id", id);
-    if (error) {
-      alert(error.message);
-      return;
+  const moderate = async (id: number, action: 'approve' | 'reject') => {
+    try {
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/moderate-pumpkin`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabaseKey,
+          },
+          body: JSON.stringify({ 
+            action,
+            pumpkinId: id,
+            adminPassword: ADMIN_PASSWORD
+          })
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        alert(result.error || `Error al ${action === 'approve' ? 'aprobar' : 'rechazar'}`);
+        return;
+      }
+
+      // Remover de la lista local
+      setPending((prev) => prev.filter((p) => p.id !== id));
+      
+    } catch (error) {
+      console.error('Error moderando:', error);
+      alert('Error de conexión');
     }
-    setPending((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const approve = async (id: number) => {
+    await moderate(id, 'approve');
   };
 
   const remove = async (id: number) => {
-    const { error } = await supabase.from("calabazas").delete().eq("id", id);
-    if (error) {
-      alert(error.message);
-      return;
-    }
-    setPending((prev) => prev.filter((p) => p.id !== id));
+    await moderate(id, 'reject');
   };
 
   if (!authed) {

@@ -350,7 +350,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.validate-image]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/validate-image/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -361,7 +361,7 @@ entrypoint = "./functions/validate-image/index.ts"
 
 [functions.validate-pumpkin]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/validate-pumpkin/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -369,3 +369,14 @@ entrypoint = "./functions/validate-pumpkin/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/validate-pumpkin/*.html" ]
+
+[functions.moderate-pumpkin]
+enabled = true
+verify_jwt = false
+import_map = "./functions/moderate-pumpkin/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/moderate-pumpkin/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/moderate-pumpkin/*.html" ]

@@ -17,23 +17,20 @@ function App() {
   const stageRef = useRef<Konva.Stage | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
+  
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
-
-  
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     isDrawing.current = true;
     const pos = e.target.getStage()?.getPointerPosition();
     if (!pos) return;
-    // Nuevo trazo invalida el redo
     if (redoStack.length) setRedoStack([]);
     setLines([...lines, { tool, color, points: [pos.x, pos.y] }]);
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
-    // Actualiza cursor siempre que haya posición
     const stage = e.target.getStage();
     if (!stage) return;
     const point = stage.getPointerPosition();
