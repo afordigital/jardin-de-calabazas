@@ -4,7 +4,6 @@ import "./App.css";
 import { Stage, Layer, Line, Rect } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
-import { createClient } from "@supabase/supabase-js";
 import Garden from "./pages/Garden";
 
 function App() {
@@ -20,7 +19,9 @@ function App() {
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+  
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     isDrawing.current = true;
