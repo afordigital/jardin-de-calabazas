@@ -13,7 +13,13 @@ type PositionedPumpkin = Pumpkin & {
   rotate: number;
 };
 
-export default function Garden() {
+type GardenProps = {
+  embedded?: boolean;
+  width?: number;
+  height?: number;
+};
+
+export default function Garden({ embedded, width: propWidth, height: propHeight }: GardenProps) {
   const [pumpkins, setPumpkins] = useState<Pumpkin[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +38,12 @@ export default function Garden() {
       if (error) {
         setError(error.message);
       } else {
-        setPumpkins((data as Pumpkin[]) ?? []);
+        const items = ((data as Pumpkin[]) ?? []).slice();
+        for (let i = items.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [items[i], items[j]] = [items[j], items[i]];
+        }
+        setPumpkins(items.slice(0, 20));
       }
       setLoading(false);
     };
@@ -43,8 +54,8 @@ export default function Garden() {
   }, []);
 
   const positioned = useMemo<PositionedPumpkin[]>(() => {
-    const width = window.innerWidth || 1200;
-    const height = window.innerHeight || 800;
+    const width = propWidth !== undefined ? propWidth : (window.innerWidth || 1200);
+    const height = propHeight !== undefined ? propHeight : (window.innerHeight || 800);
     const size = 120;
     const padding = 8;
     const minX = size / 2 + padding;
@@ -84,7 +95,7 @@ export default function Garden() {
     }
 
     return placed;
-  }, [pumpkins]);
+  }, [pumpkins, propWidth, propHeight]);
 
   if (loading) {
     return <div className="w-full min-h-screen flex items-center justify-center">Cargando jardín…</div>;
@@ -99,12 +110,14 @@ export default function Garden() {
   }
 
   return (
-    <div className="w-full min-h-screen overflow-hidden relative" >
-      <div className="absolute top-4 left-4 z-10">
-        <Link to="/" className="border-2 border-slate-600 rounded px-2 py-1 text-sm bg-white/70">
-          Volver a dibujar
-        </Link>
-      </div>
+    <div className={`overflow-hidden relative ${embedded ? "" : "w-full min-h-screen"}`} style={embedded ? { width: propWidth, height: propHeight } : undefined} >
+      {!embedded && (
+        <div className="absolute top-4 left-4 z-10">
+          <Link to="/" className="border-2 border-slate-600 rounded px-2 py-1 text-sm bg-white/70">
+            Volver a dibujar
+          </Link>
+        </div>
+      )}
       {positioned.map((p) => (
         <img
           key={p.id}
@@ -132,3 +145,4 @@ export default function Garden() {
     </div>
   );
 }
+
